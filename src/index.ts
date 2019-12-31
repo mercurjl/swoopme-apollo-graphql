@@ -10,35 +10,43 @@ import { ApolloServer, ApolloError, ValidationError, gql } from 'apollo-server';
 
 interface User {
   id: string;
-  name: string;
-  screenName: string;
-  statusesCount: number;
+  email: string;
+  firstName: string;
+  lastName: string;
 }
 
-interface Tweet {
+interface Event {
   id: string;
-  likes: number;
-  text: string;
-  userId: string;
+  title: number;
+  description: string;
+  user: User;
+  location: Location;
+  rsvp: string;
+  public: boolean
+}
+
+interface Location {
+  latitiude: number,
+  longitude: number
 }
 
 const typeDefs = gql`
-  # A Twitter User
+  # A User
   type User {
     id: ID!
-    name: String!
-    screenName: String!
-    statusesCount: Int!
-    tweets: [Tweets]!
+    firstName: String!
+    lastName: String!
+    email: Int!
+    events: [Event]!
   }
 
-  # A Tweet Object
-  type Tweets {
+  # An Event Object
+  type Event {
     id: ID!
-    text: String!
-    userId: String!
+    title: String!
+    description: String!
+    location: Location!
     user: User!
-    likes: Int!
   }
 
   type Query {
@@ -49,12 +57,12 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    async tweets() {
-      const tweets = await admin
+    async events() {
+      const events = await admin
         .firestore()
         .collection('tweets')
         .get();
-      return tweets.docs.map(tweet => tweet.data()) as Tweet[];
+      return events.docs.map(event => event.data()) as Event[];
     },
     async user(_: null, args: { id: string }) {
       try {
